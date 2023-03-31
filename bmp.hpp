@@ -26,12 +26,7 @@ class bmp {
 	void write_header(std::ofstream& out);
 	void write_info_header(std::ofstream& out);
 
-	template <typename T>
-	inline void write_to_stream(std::ofstream& stream, const T& t) const {
-		stream.write(reinterpret_cast<const char*>(&t), sizeof(T));
-	}
-
 public:
 	bmp(const int image_width, const int image_height) : width(image_width), height(image_height), file_size(54 + (image_width * image_height)) {}
-	void write_to_file(std::ofstream& out, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>> pixels);
+	void write_to_file(std::ofstream& out, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& pixels);
 };

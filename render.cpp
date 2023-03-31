@@ -52,7 +52,13 @@ hittable_list render::random_scene() {
 	auto material3 = std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
 	world.add(std::make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
-	return world;
+	// retun here to use the original scene without bvh
+	// return world;
+
+	bvh_node bvh_tree = create_bvh_tree(world);
+	hittable_list bvh_world;
+	bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
+	return bvh_world;
 }
 
 hittable_list render::default_scene() {
@@ -123,9 +129,15 @@ void render::render_to_ppm() {
 
 	out << "P3\n" << image_width << ' ' << image_height << "\n255\n";
 
-	for(auto& pixel : image) {
-		out << (int)std::get<0>(pixel) << " " << (int)std::get<1>(pixel) << " " << (int)std::get<2>(pixel) << '\n';
+	// Create a string buffer to store the pixel data
+	std::stringstream buffer;
+
+	for(const auto& pixel : image) {
+		buffer << (int)std::get<0>(pixel) << " " << (int)std::get<1>(pixel) << " " << (int)std::get<2>(pixel) << '\n';
 	}
+
+	// Write the entire buffer to the file in one operation
+	out << buffer.rdbuf();
 
 	out.close();
 }

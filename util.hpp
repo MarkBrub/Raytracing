@@ -37,6 +37,11 @@ inline double random_double(const double min, const double max) {
 	return min + ((max - min) * random_double());
 }
 
+inline int random_int(int min, int max) {
+	// Returns a random integer in [min,max].
+	return static_cast<int>(random_double(min, max + 1));
+}
+
 inline void print_progress_bar(const double progress, const double maxValue) {
 	std::ios::sync_with_stdio(false);
 	const int BAR_LENGTH = 80;

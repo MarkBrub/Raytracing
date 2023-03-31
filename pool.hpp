@@ -5,11 +5,13 @@
 #include <mutex>
 #include <atomic>
 #include <future>
+#include <condition_variable>
 
 struct pool {
 	int num_threads = 0;
 	std::vector<std::thread> threads;
 	std::mutex m;
+	std::condition_variable cv;
 	std::queue<std::packaged_task<void()>> tasks;
 	std::atomic<int> remaining_tasks{0};
 
@@ -33,8 +35,8 @@ struct pool {
 
 	template<typename F, typename... Args>
 	auto enqueue_task(F&& f, Args&&... args) {
-		using return_type = typename std::result_of<F(Args...)>::type;
-		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(f, args...));
+		using return_type = typename std::invoke_result_t<std::decay_t<F>, std::decay_t<Args>...>;
+		auto task = std::make_shared<std::packaged_task<return_type()>>(std::bind(std::forward<F>(f), std::forward<Args>(args)...));
 		std::future<return_type> res = task->get_future();
 		tasks.emplace([task]() { (*task)(); });
 		remaining_tasks++;

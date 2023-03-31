@@ -1,5 +1,6 @@
 #pragma once
 
+#include "aabb.hpp"
 #include "vec3.hpp"
 #include "ray.hpp"
 
@@ -20,4 +21,5 @@ struct hit_record {
 
 struct hittable {
 	virtual bool hit(const ray& r, const double t_min, const double t_max, hit_record& rec) const = 0;
+	virtual bool bounding_box(aabb& output_box) const = 0;
 };
