@@ -7,9 +7,14 @@
 struct hit_record;
 
 struct material {
+	virtual color emitted() const {
+		return color(0, 0, 0);
+	}
 	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const = 0;
 };
 
+// A lambertian is a material that absorbs light.
+// These will render as matte surfaces.
 struct lambertian : public material {
 	color albedo;
 
@@ -28,8 +33,11 @@ struct lambertian : public material {
 	}
 };
 
+// A metal is a material that reflects light.
+// These will render as shiny surfaces.
 struct metal : public material {
 	color albedo;
+	// needs to be between 0 and 1
 	double fuzz;
 
 	metal(const color& a, const double f) : albedo(a), fuzz(f < 1 ? f : 1) {}
@@ -45,11 +53,16 @@ struct metal : public material {
 	}
 };
 
+// A dielectric is a material that refracts light.
+// These will render as transparent surfaces.
 struct dielectric : public material {
+	// Index of refraction
 	double ir;
 
 	dielectric(const double index_of_refraction) : ir(index_of_refraction) {}
 
+	// Snell's Law
+	// This scatters the rays through the dielectric.
 	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
 		attenuation = color(1, 1, 1);
 		double refraction_ratio = rec.front_face ? (1.0 / ir) : ir;
@@ -78,4 +91,38 @@ private:
 		r0 = r0 * r0;
 		return r0 + (1 - r0) * pow((1 - cosine), 5);
 	}
+};
+
+// A diffuse light is a material that emits light.
+// These will render as light sources.
+class diffuse_light : public material {
+public:
+	diffuse_light(std::shared_ptr<color> a) : emit(a) {}
+	diffuse_light(const color& c) : emit(std::make_shared<color>(c)) {}
+
+	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
+		return false;
+	}
+
+	// Because I don't have textures yet, I'm just going to return the color of the light.
+	virtual color emitted() const override {
+		return *emit;
+	}
+
+	private:
+		std::shared_ptr<color> emit;
+};
+
+class isotropic : public material {
+public:
+	isotropic(const color& c) : albedo(std::make_shared<color>(c)) {}
+	
+	virtual bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered) const override {
+		scattered = ray(rec.p, random_in_unit_sphere());
+		attenuation = *albedo;
+		return true;
+	}
+
+public:
+	std::shared_ptr<color> albedo;
 };

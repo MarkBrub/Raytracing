@@ -25,22 +25,38 @@ void bmp::write_info_header(std::ofstream& out) {
 }
 
 void bmp::write_to_file(std::ofstream& out, std::vector<std::tuple<uint8_t, uint8_t, uint8_t>>& pixels) {
-	write_header(out);
-	write_info_header(out);
+    write_header(out);
+    write_info_header(out);
 
-	// Calculate the total size of the pixel data
-	std::size_t dataSize = pixels.size() * 3; // 3 bytes per pixel (R, G, B)
+    // Calculate the padding needed for each row
+    std::size_t rowSize = width * 3;
+    std::size_t paddingSize = (4 - (rowSize % 4)) % 4;
 
-	// Create a buffer to store the pixel data
-	std::vector<uint8_t> buffer;
-	buffer.reserve(dataSize);
+    // Calculate the total size of the pixel data including padding
+    std::size_t dataSize = (rowSize + paddingSize) * height;
 
-	for (const auto& pixel : pixels | std::ranges::views::reverse) {
-		buffer.push_back(std::get<2>(pixel)); // Blue
-		buffer.push_back(std::get<1>(pixel)); // Green
-		buffer.push_back(std::get<0>(pixel)); // Red
-	}
+    // Create a buffer to store the pixel data
+    std::vector<uint8_t> buffer;
+    buffer.reserve(dataSize);
 
-	// Write the entire buffer to the file in one operation
-	out.write(reinterpret_cast<const char*>(buffer.data()), dataSize);
+    // Reverse iterator to loop through the pixel rows in reverse
+    auto rowIter = pixels.rbegin();
+
+    for (std::size_t row = 0; row < height; row++) {
+        for (std::size_t col = 0; col < width; col++) {
+            const auto& pixel = *rowIter;
+            buffer.push_back(std::get<2>(pixel)); // Blue
+            buffer.push_back(std::get<1>(pixel)); // Green
+            buffer.push_back(std::get<0>(pixel)); // Red
+            ++rowIter;
+        }
+        // Add padding to the row
+        for (std::size_t pad = 0; pad < paddingSize; ++pad) {
+            buffer.push_back(0);
+        }
+    }
+
+    // Write the entire buffer to the file in one operation
+    out.write(reinterpret_cast<const char*>(buffer.data()), dataSize);
 }
+

@@ -1,7 +1,7 @@
 #include "pool.hpp"
 
 pool::pool() {
-	num_threads = std::thread::hardware_concurrency() / 2;
+	num_threads = std::thread::hardware_concurrency() / 1.5;
 }
 
 void pool::start_pool() {
@@ -24,8 +24,16 @@ void pool::run_tasks() {
 			//Exit thread when there are no tasks left to run
 			if(tasks.empty()) return;
 
-			f = std::move(tasks.front());
-			tasks.pop();
+			// for queue
+			// f = std::move(tasks.front());
+			// tasks.pop();
+
+			// for vector
+			// get a random task
+			size_t index = rand() % tasks.size();
+			f = std::move(tasks[index]);
+			// remove the task from the vector
+			tasks.erase(tasks.begin() + index);
 		}
 
 		//Abort if the function is not valid
