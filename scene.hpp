@@ -10,7 +10,6 @@
 #include "box.hpp"
 #include "constant_medium.hpp"
 #include "material.hpp"
-#include "bvh.hpp"
 
 class scene {
 public:
@@ -29,11 +28,6 @@ public:
 		auto difflight = std::make_shared<diffuse_light>(color(4, 4, 4));
 		objects.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, difflight));
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(objects);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom = point3(26, 3, 6);
 		point3 lookat = point3(0, 2, 0);
@@ -48,7 +42,7 @@ public:
 			return color(0, 0, 0);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(objects, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> basic_light(double aspect_ratio) {
@@ -70,11 +64,6 @@ public:
 		auto light = std::make_shared<diffuse_light>(color(30, 30, 30));
 		world.add(std::make_shared<xy_rect>(3, 5, 1, 3, -2, light));
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(world);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom(13, 2, 3);
 		point3 lookat(0, 0, 0);
@@ -89,7 +78,7 @@ public:
 			return color(0, 0, 0);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(world, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> random_scene(double aspect_ratio) {
@@ -149,11 +138,6 @@ public:
 		auto material3 = std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
 		world.add(std::make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(world);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom = point3(13, 2, 3);
 		point3 lookat = point3(0, 0, 0);
@@ -173,7 +157,7 @@ public:
 			return ((1.0 - t) * color(1, 1, 1)) + (t * blend);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(world, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> default_scene(double aspect_ratio) {
@@ -186,11 +170,6 @@ public:
 		world.add(std::make_shared<sphere>(point3(-4, 1, 0), 1.0, material2));
 		auto material3 = std::make_shared<metal>(color(0.7, 0.6, 0.5), 0.0);
 		world.add(std::make_shared<sphere>(point3(4, 1, 0), 1.0, material3));
-
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(world);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
 
 		// Camera setup
 		point3 lookfrom = point3(13, 2, 3);
@@ -206,7 +185,7 @@ public:
 			return color(.70, .80, 1.00); // Sky blue
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(world, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> basic_cornell_box(double aspect_ratio) {
@@ -238,11 +217,6 @@ public:
 		box2 = std::make_shared<translate>(box2, vec3(130, 0, 65));
 		objects.add(box2);
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(objects);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom(278, 278, -800);
 		point3 lookat(278, 278, 0);
@@ -257,7 +231,7 @@ public:
 			return color(0, 0, 0);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(objects, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> smoke_cornell_box(double aspect_ratio) {
@@ -290,11 +264,6 @@ public:
 		objects.add(make_shared<constant_medium>(box1, 0.01, color(0, 0, 0)));
 		objects.add(make_shared<constant_medium>(box2, 0.01, color(1, 1, 1)));
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(objects);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom(278, 278, -800);
 		point3 lookat(278, 278, 0);
@@ -309,7 +278,7 @@ public:
 			return color(0, 0, 0);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(objects, cam, background);
 	}
 
 	static std::tuple<hittable_list, camera, std::function<color(const vec3&)>> final_scene(double aspect_ratio) {
@@ -367,11 +336,6 @@ public:
 			)
 		);
 
-		// Create a BVH tree from the world
-		bvh_node bvh_tree = create_bvh_tree(objects);
-		hittable_list bvh_world;
-		bvh_world.add(std::make_shared<bvh_node>(bvh_tree));
-
 		// Camera setup
 		point3 lookfrom(478, 278, -600);
 		point3 lookat(278, 278, 0);
@@ -386,6 +350,6 @@ public:
 			return color(0, 0, 0);
 		};
 
-		return std::make_tuple(bvh_world, cam, background);
+		return std::make_tuple(objects, cam, background);
 	}
 };

@@ -1,7 +1,7 @@
 #include "pool.hpp"
 
 pool::pool() {
-	num_threads = std::thread::hardware_concurrency() / 1.5;
+	num_threads = static_cast<int>(std::thread::hardware_concurrency() / 1.5);
 }
 
 void pool::start_pool() {

@@ -54,3 +54,8 @@ std::shared_ptr<hittable> ptr;
 	bool hasbox;
 	aabb bbox;
 };;
+
+bool box_compare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b, int axis);
+bool box_x_compare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b);
+bool box_y_compare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b);
+bool box_z_compare(const std::shared_ptr<hittable> a, const std::shared_ptr<hittable> b);

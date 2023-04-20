@@ -17,6 +17,7 @@
 #include "bmp.hpp"
 #include "pool.hpp"
 #include "scene.hpp"
+#include "improved_bvh.hpp"
 
 struct render {
 	// Final Product
@@ -27,8 +28,8 @@ struct render {
 	double aspect_ratio = 1.0;
 	int image_width = 1920 / 4;
 	int image_height = static_cast<int>(image_width / aspect_ratio);
-	int samples_per_pixel = 100;
-	int max_depth = 50;
+	int samples_per_pixel = 3000;
+	int max_depth = 8;
 
 	// World
 	hittable_list world;
@@ -41,7 +42,7 @@ struct render {
 	std::function<color(const vec3&)> background;
 
 	render() {
-		switch (4) {
+		switch (6) {
 			case 0: 
 				init_scene(scene::default_scene);
 				break;
@@ -74,11 +75,18 @@ struct render {
 	// The return type is a tuple of a hittable_list, camera, and a function that takes a vec3 and returns a color
 	// The function takes in the aspect ratio of the image
 	void init_scene(std::function<std::tuple<hittable_list, camera, std::function<color(const vec3&)>>(double)> scene_func) {
-		auto [w, c, b] = scene_func(aspect_ratio);
+		auto start = std::chrono::high_resolution_clock::now();
 
-		world = std::move(w);
+		auto [w, c, b] = scene_func(aspect_ratio);
+		
+		improved_bvh_node improved_bvh_world(w);
+		world.add(std::make_shared<improved_bvh_node>(improved_bvh_world));
 		cam = std::move(c);
 		background = std::move(b);
+
+		auto end = std::chrono::high_resolution_clock::now();
+		auto duration = std::chrono::duration_cast<std::chrono::microseconds>(end - start);
+		std::cout << "Scene initialization took " << duration.count() << " microseconds" << std::endl;
 	}
 
 	void generate_image();

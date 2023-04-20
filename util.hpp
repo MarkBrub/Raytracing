@@ -89,8 +89,7 @@ inline void print_progress_bar(double progress, double maxValue, uint64_t elapse
 	std::ranges::fill(bar.begin(), bar.begin() + static_cast<int>(fill_amount), static_cast<char>(0xDB));
 
 	// Calculate the ETA
-	double eta = 0.0;
-	eta = (elapsed_time / progress) * (maxValue - progress);
+	uint64_t eta = static_cast<uint64_t>(static_cast<double>(elapsed_time) / progress * (maxValue - progress));
 
 	if (update_count % 10 != 0) {
 		eta_string = ms_to_time(eta);
