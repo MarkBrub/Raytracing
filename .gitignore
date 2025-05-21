@@ -364,3 +364,5 @@ FodyWeavers.xsd
 /Raytracing.sln
 /Raytracing.vcxproj
 /Raytracing.vcxproj.filters
+
+.vscode/
